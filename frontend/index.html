@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>vigilAnt - Disaster Relief Fund</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E🐜%3C/text%3E%3C/svg%3E" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=DM+Sans:wght@300;400;500;600&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── NAV ── -->
+  <nav class="nav" id="nav">
+    <div class="nav-inner">
+      <a href="#" class="nav-logo">
+        <img src="assets/vigilAnt Logo.png" alt ="vigilAnt Logo" class="logo-image">
+      </a>
+      <div class="nav-right">
+        <span class="nav-network" id="navNetwork">Sepolia</span>
+        <button class="btn btn-primary btn-sm" id="connectBtn">Connect Wallet</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── WALLET STATUS BANNER ── -->
+  <div class="wallet-banner hidden" id="walletBanner">
+    <div class="wallet-banner-inner">
+      <div class="wallet-info">
+        <span class="wallet-dot" id="walletDot"></span>
+        <span class="wallet-address" id="walletAddress">Not connected</span>
+        <span class="wallet-badge" id="walletRole"></span>
+      </div>
+      <div class="wallet-meta">
+        <span class="usdc-balance" id="usdcBalance">— USDC</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── NETWORK WRONG BANNER ── -->
+  <div class="alert-banner hidden" id="networkBanner">
+    <span>⚠ Wrong network — switch to Ethereum Sepolia to continue</span>
+    <button class="btn btn-ghost btn-sm" id="switchNetworkBtn">Switch Network</button>
+  </div>
+
+  <!-- ── CONTRACT NOT DEPLOYED BANNER ── -->
+  <div class="alert-banner alert-info hidden" id="contractBanner">
+    <span>Contract address not yet set — update <code>VIGILANT_CONTRACT</code> in config.js after deployment</span>
+  </div>
+
+  <!-- ── HERO ── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-inner">
+
+      <!-- Left: text -->
+      <div class="hero-text">
+        <div class="hero-eyebrow">BAC2002 · Blockchain & Cryptocurrency</div>
+        <h1 class="hero-title">
+          Don't be <em>the cricket.</em><br>
+          Be the ant.
+        </h1>
+        <p class="hero-fable">
+          In Aesop's fable, the cricket sang all summer while the ants prepared.
+          When disaster came, only the ants survived.
+        </p>
+        <p class="hero-sub">
+          vigilAnt is a parametric disaster relief fund for Asia.
+          Contributors pool USDC now before disaster strikes. When a verified
+          event is confirmed by 3-of-5 validators, NGOs receive automatic payouts.
+          No banks. No delays. No single point of control.
+        </p>
+        <div class="hero-countries" id="heroCountries">
+          <!-- populated by JS -->
+        </div>
+      </div>
+
+      <!-- Right: illustration -->
+      <div class="hero-image-wrap">
+        <img
+          src="assets/Cricket.png"
+          alt="Ants surrounding a cricket — be the ant, not the cricket"
+          class="hero-image"
+          draggable="false"
+        />
+        <div class="hero-image-caption">
+          The cricket waited. The ants prepared.
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+  <!-- ── COUNTRY + POOL STATS ── -->
+  <section class="section section-frost">
+    <div class="container">
+      <div class="section-eyebrow">Pool Overview</div>
+      <h2 class="section-title">Select a <em>country pool</em></h2>
+      <div class="country-selector" id="countrySelector">
+        <!-- populated by JS -->
+      </div>
+      <div class="pool-stats" id="poolStats">
+        <div class="pool-stat">
+          <div class="pool-stat-label">Pool Balance</div>
+          <div class="pool-stat-value" id="poolBalance">—</div>
+        </div>
+        <div class="pool-stat">
+          <div class="pool-stat-label">Pool Status</div>
+          <div class="pool-stat-value" id="poolStatus">—</div>
+        </div>
+        <div class="pool-stat">
+          <div class="pool-stat-label">Latest Event</div>
+          <div class="pool-stat-value" id="poolLatestEvent">—</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── PANELS (role-based, shown/hidden by JS) ── -->
+  <section class="section" id="panelsSection">
+    <div class="container panels-grid">
+
+      <!-- PANEL A — CONTRIBUTOR (shown to all connected wallets) -->
+      <div class="panel" id="panelContributor">
+        <div class="panel-header">
+          <div class="panel-eyebrow">Contributor</div>
+          <h3 class="panel-title">Your Contribution</h3>
+        </div>
+
+        <!-- Existing contribution display -->
+        <div class="contribution-display hidden" id="contributionDisplay">
+          <div class="contrib-row">
+            <span class="contrib-label">Amount</span>
+            <span class="contrib-value" id="contribAmount">—</span>
+          </div>
+          <div class="contrib-row">
+            <span class="contrib-label">Country</span>
+            <span class="contrib-value" id="contribCountry">—</span>
+          </div>
+          <div class="contrib-row">
+            <span class="contrib-label">Expires</span>
+            <span class="contrib-value" id="contribExpiry">—</span>
+          </div>
+          <div class="contrib-row">
+            <span class="contrib-label">Status</span>
+            <span class="contrib-value contrib-status" id="contribStatus">—</span>
+          </div>
+        </div>
+
+        <!-- No contribution placeholder -->
+        <div class="empty-state" id="contribEmpty">
+          <div class="empty-icon">🌱</div>
+          <div class="empty-text">No active contribution</div>
+        </div>
+
+        <!-- Deposit form -->
+        <div class="form-section" id="depositForm">
+          <div class="form-divider">New Deposit</div>
+          <div class="form-group">
+            <label class="form-label">Country Pool</label>
+            <select class="form-select" id="depositCountry">
+              <!-- populated by JS -->
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Amount (USDC)</label>
+            <div class="input-wrap">
+              <input class="form-input" type="number" id="depositAmount" min="10" step="1" placeholder="Min. 10 USDC" />
+              <span class="input-suffix">USDC</span>
+            </div>
+            <div class="form-hint" id="depositFeeHint">5% platform fee applies — 100 USDC deposited = 95 USDC in pool</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Commitment Duration</label>
+            <div class="duration-pills" id="durationPills">
+              <!-- populated by JS -->
+            </div>
+          </div>
+          <div class="tx-progress hidden" id="depositProgress">
+            <div class="tx-step" id="txStep1">
+              <span class="tx-dot"></span>
+              <span class="tx-label">Step 1 of 2: Approving USDC spend…</span>
+            </div>
+            <div class="tx-step" id="txStep2">
+              <span class="tx-dot"></span>
+              <span class="tx-label">Step 2 of 2: Depositing into pool…</span>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-full" id="depositBtn" disabled>
+            Connect wallet to deposit
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL B — VALIDATOR (shown only if isValidator = true) -->
+      <div class="panel panel-validator hidden" id="panelValidator">
+        <div class="panel-header">
+          <div class="panel-eyebrow validator-eyebrow">Validator</div>
+          <h3 class="panel-title">Disaster Confirmation</h3>
+        </div>
+
+        <!-- No pending event -->
+        <div class="empty-state" id="validatorEmpty">
+          <div class="empty-icon">🛡️</div>
+          <div class="empty-text">No pending disaster event</div>
+          <div class="empty-sub">Select a country above to check for pending events</div>
+        </div>
+
+        <!-- Pending event display -->
+        <div class="event-display hidden" id="eventDisplay">
+          <div class="event-header">
+            <div class="event-country" id="eventCountry">—</div>
+            <div class="event-severity" id="eventSeverity">—</div>
+          </div>
+          <div class="event-meta">
+            <div class="event-meta-row">
+              <span class="event-meta-label">Event ID</span>
+              <span class="event-meta-value" id="eventId">—</span>
+            </div>
+            <div class="event-meta-row">
+              <span class="event-meta-label">Reported</span>
+              <span class="event-meta-value" id="eventReportedAt">—</span>
+            </div>
+            <div class="event-meta-row">
+              <span class="event-meta-label">GDACS ID</span>
+              <span class="event-meta-value" id="eventGdacsId">—</span>
+            </div>
+          </div>
+
+          <!-- Confirmation progress -->
+          <div class="confirm-progress">
+            <div class="confirm-label">
+              <span>Confirmations</span>
+              <span class="confirm-count" id="confirmCount">0 / 3</span>
+            </div>
+            <div class="confirm-bar">
+              <div class="confirm-fill" id="confirmFill"></div>
+            </div>
+          </div>
+
+          <!-- Validator status grid -->
+          <div class="validator-grid" id="validatorGrid">
+            <!-- populated by JS: 5 validator chips -->
+          </div>
+
+          <button class="btn btn-brand btn-full" id="confirmBtn" disabled>
+            Confirm Disaster
+          </button>
+        </div>
+      </div>
+
+      <!-- PANEL C — ADMIN (shown only if owner) -->
+      <div class="panel panel-admin hidden" id="panelAdmin">
+        <div class="panel-header">
+          <div class="panel-eyebrow admin-eyebrow">Admin</div>
+          <h3 class="panel-title">System Controls</h3>
+        </div>
+
+        <div class="admin-actions">
+          <div class="admin-action-group">
+            <div class="admin-action-label">Oracle Request</div>
+            <div class="admin-action-desc">Trigger Chainlink to fetch GDACS data for selected country. Costs 0.1 LINK.</div>
+            <button class="btn btn-ghost btn-full" id="oracleBtn">Request Disaster Data</button>
+          </div>
+
+          <div class="admin-action-group">
+            <div class="admin-action-label">Simulate Disaster <span class="badge-fallback">Fallback</span></div>
+            <div class="admin-action-desc">Bypass oracle — create a PENDING event directly. Use if Chainlink is unavailable.</div>
+            <div class="admin-row">
+              <select class="form-select" id="simulateSeverity">
+                <option value="1">Orange Alert</option>
+                <option value="2">Red Alert</option>
+              </select>
+              <button class="btn btn-ghost" id="simulateBtn">Simulate</button>
+            </div>
+          </div>
+
+          <div class="admin-action-group">
+            <div class="admin-action-label">Return Expired Funds</div>
+            <div class="admin-action-desc">Return USDC to a contributor whose commitment window has expired.</div>
+            <div class="admin-row">
+              <input class="form-input" type="text" id="returnAddress" placeholder="0x contributor address" />
+              <button class="btn btn-ghost" id="returnBtn">Return</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end panels-grid -->
+  </section>
+
+  <!-- ── TRANSPARENCY DASHBOARD ── -->
+  <section class="section section-frost" id="dashboardSection">
+    <div class="container">
+      <div class="section-eyebrow">Transparency</div>
+      <h2 class="section-title">On-chain <em>audit log</em></h2>
+      <p class="section-sub">Every transaction recorded on Ethereum Sepolia — public, timestamped, immutable.</p>
+
+      <div class="feed-controls">
+        <button class="btn btn-ghost btn-sm" id="refreshFeedBtn">Refresh</button>
+        <button class="btn btn-ghost btn-sm" id="clearFeedBtn">Clear</button>
+        <span class="feed-status" id="feedStatus">Idle</span>
+      </div>
+
+      <div class="feed" id="activityFeed">
+        <div class="feed-empty">
+          <div class="feed-empty-icon">📋</div>
+          <div>Connect your wallet to load on-chain events</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── FOOTER ── -->
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-logo">
+        <img src="assets/vigilAnt Logo.png" alt ="vigilAnt Logo" class="logo-image">
+      </div>
+      <div class="footer-meta">
+        <span>Ethereum Sepolia Testnet</span>
+        <span>·</span>
+        <span>USDC ERC-20</span>
+        <span>·</span>
+        <span>Chainlink Any API</span>
+        <span>·</span>
+        <span>3-of-5 Multisig</span>
+      </div>
+      <div class="footer-note">BAC2002 Team Project · Singapore Institute of Technology</div>
+    </div>
+  </footer>
+
+  <!-- ── TOAST CONTAINER ── -->
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
