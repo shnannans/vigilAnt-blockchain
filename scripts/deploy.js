@@ -46,8 +46,8 @@ async function main() {
     "0x06cBE48CD25F61682740F76B6cd966862b21015F",   // shannon (both admin and validator)
     "0xB4A6b8A3cC14389df36f5470c5A860C7C0F8eb13",   // jing wen
     "0xa2b2874B8cBD27bce28A6c9c2B909521dD3C6477",   // corvan
-    "0xC5b5a02Ba126F3c0a7a1e1A315E1708ccdE4211c",   // vencia
-    "0x_FILL_IN_VALIDATOR_5",   // jeanie
+    "0xC5b5a02Ba126F3c0a7a1e1A315E1708ccdE4211c",   // venecia
+    "0x8257Ba2524235f3a4150F7Af864BA0c0cc8fF914",   // jeanie
   ];
 
   // ── NGO ADDRESSES — FILL IN ────────────────────────────────────────────────
