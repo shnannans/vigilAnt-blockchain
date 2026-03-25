@@ -75,8 +75,8 @@ async function main() {
   // ── CHAINLINK ORACLE CONFIG — PERSON B FILLS IN ────────────────────────────
   // Person B: fill these in after setting up the Chainlink Any API job.
   // Find them in your Chainlink node dashboard / job-spec.md.
-  const ORACLE_ADDRESS = "0x_FILL_IN_ORACLE_ADDRESS";  // Person B fills in
-  const JOB_ID_STRING  = "FILL_IN_JOB_ID";             // Person B fills in (string, will be converted to bytes32)
+  const ORACLE_ADDRESS = "0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD";  // Person B fills in
+  const JOB_ID_STRING  = "7da2702f37fd48e5b1b9a5715e3509b6";             // Person B fills in (string, will be converted to bytes32)
   const LINK_FEE       = ethers.parseUnits("0.1", 18); // 0.1 LINK per request (standard Sepolia fee)
 
   // Convert job ID string to bytes32 (Chainlink expects bytes32)

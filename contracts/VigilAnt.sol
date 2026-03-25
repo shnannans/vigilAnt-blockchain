@@ -323,7 +323,7 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
         require(duration <= 2, "VigilAnt: invalid duration (use 0, 1, or 2)");
         require(
             contributions[msg.sender].amount == 0 || contributions[msg.sender].returned,
-            "VigilAnt: active contribution exists — wait for expiry or payout"
+            "VigilAnt: active contribution exists - wait for expiry or payout"
         );
 
         // Calculate fee and net amount
@@ -405,7 +405,8 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
         //
         // Update this comment once confirmed.
         string memory countryISO = _countryISO(countryCode);
-        req._add("get", string(abi.encodePacked("https://www.gdacs.org/xml/rss.xml?country=", countryISO)));
+        // for demo purposes
+        req._add("get", "https://gist.githubusercontent.com/Hgowj/8f26ad2fda6590653f64dac4993fdced/raw/f38ff4109fac488f39e3bf942b03c0f69764d6f7/gdacs-mock.json");
 
         // Path to extract alert level from the GDACS response
         // Person B: confirm this path matches your job spec's parsed JSON/XML structure
