@@ -277,11 +277,7 @@ async function initSession() {
   currentRole = isOwner ? "admin" : isVal ? "validator" : "contributor";
 
   // Load validator addresses
-  validatorAddresses = [];
-  for (let i = 0; i < 5; i++) {
-    try { validatorAddresses.push(await vigilant.validators(i)); }
-    catch { validatorAddresses.push(null); }
-  }
+  validatorAddresses = CONFIG.VALIDATORS;
 
   // Update wallet badge
   walletRole.textContent = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
@@ -297,11 +293,9 @@ async function initSession() {
   connectBtn.textContent = fmtAddress(currentAddress);
 
   // Load data
-  await Promise.all([
-    refreshPoolStats(),
-    refreshContributorPanel(),
-    currentRole !== "contributor" ? refreshValidatorPanel() : Promise.resolve(),
-  ]);
+  await refreshContributorPanel();
+  await refreshPoolStats();
+  if (currentRole !== "contributor") await refreshValidatorPanel();
 
   // Start event listeners
   startFeedListeners();
@@ -488,7 +482,7 @@ async function handleDeposit() {
     // Step 1: Approve full amount (net + fee both pulled from user wallet)
     // ⚠️  Must approve full amountRaw — contract does two transferFrom internally
     const approveTx = await usdc.connect(signer).approve(CONFIG.VIGILANT_CONTRACT, amountRaw);
-    await approveTx.wait();
+    await approveTx.wait(1);
 
     txStep1.classList.remove("active");
     txStep1.classList.add("done");
@@ -497,7 +491,7 @@ async function handleDeposit() {
 
     // Step 2: Deposit
     const depositTx = await vigilant.connect(signer).deposit(country, amountRaw, duration);
-    await depositTx.wait();
+    await depositTx.wait(1);
 
     txStep2.classList.remove("active");
     txStep2.classList.add("done");
@@ -682,6 +676,7 @@ function startFeedListeners() {
 
 async function loadFeedHistory() {
   if (!vigilant) return;
+  if (activityFeed.querySelector(".feed-item")) return; // already loaded
   feedStatus.textContent = "Loading…";
   feedStatus.className = "feed-status";
   try {
@@ -761,3 +756,10 @@ if (window.ethereum) {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 buildStaticUI();
+
+// Show pool stats without requiring wallet connection
+if (CONFIG.VIGILANT_CONTRACT && !CONFIG.VIGILANT_CONTRACT.includes("FILL")) {
+  const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URLS[0]);
+  const readContract = new ethers.Contract(CONFIG.VIGILANT_CONTRACT, VIGILANT_ABI, readProvider);
+  readContract.getPoolBalance(1).then(b => { if (poolBalance) poolBalance.textContent = fmt(b); }).catch(() => {});
+}
