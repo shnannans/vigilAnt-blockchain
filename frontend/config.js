@@ -15,7 +15,7 @@ export const CONFIG = {
 
   // ── Contracts ─────────────────────────────────────────────────────────────
   // ⚠️  Fill VIGILANT_CONTRACT after Person A deploys — update here + notify team
-  VIGILANT_CONTRACT: "0x__FILL_AFTER_DEPLOY__",
+  VIGILANT_CONTRACT: "0x477f721640CfB9a9c3A8aE953B1f69a45F15B904",
   USDC_ADDRESS:      "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // DO NOT CHANGE
 
   // ── USDC ──────────────────────────────────────────────────────────────────
@@ -44,6 +44,17 @@ export const CONFIG = {
 
   // ── Feed ──────────────────────────────────────────────────────────────────
   FEED_BLOCK_RANGE: 1000, // how far back to scan for past events on load
+
+  // ── Validators ────────────────────────────────────────────────────────────
+  // validators array is private in contract — frontend reads from here instead
+  // Order must match exactly what was passed into the constructor
+  VALIDATORS: [
+    "0x06cBE48CD25F61682740F76B6cd966862b21015F", // [0] shannon
+    "0xB4A6b8A3cC14389df36f5470c5A860C7C0F8eb13", // [1] jing wen
+    "0xa2b2874B8cBD27bce28A6c9c2B909521dD3C6477", // [2] corvan
+    "0xC5b5a02Ba126F3c0a7a1e1A315E1708ccdE4211c", // [3] venecia
+    "0x8257Ba2524235f3a4150F7Af864BA0c0cc8fF914", // [4] jeanie
+  ],
 };
 
 // ── Minimal ABIs ─────────────────────────────────────────────────────────────
@@ -65,14 +76,13 @@ export const VIGILANT_ABI = [
   // Read
   "function getContribution(address contributor) external view returns (tuple(address contributor, uint8 countryCode, uint256 amount, uint256 expiry, bool returned))",
   "function getPoolBalance(uint8 countryCode) external view returns (uint256)",
-  "function getDisasterEvent(uint256 eventId) external view returns (tuple(uint8 countryCode, uint8 severity, string gdacsEventId, uint256 reportedAt, uint8 confirmations, uint8 status))",
+  "function getDisasterEvent(uint256 eventId) external view returns (tuple(uint8 countryCode, uint8 severity, bytes32 gdacsEventId, uint256 reportedAt, uint8 confirmations, uint8 status))",
   "function getConfirmationCount(uint256 eventId) external view returns (uint8)",
   "function hasConfirmed(uint256 eventId, address validator) external view returns (bool)",
   "function isValidator(address account) external view returns (bool)",
   "function getLatestEvent(uint8 countryCode) external view returns (uint256)",
   "function getNGOs(uint8 countryCode) external view returns (tuple(address wallet, uint256 minAmount, uint8 countryCode)[])",
   "function owner() external view returns (address)",
-  "function validators(uint256 index) external view returns (address)",
 
   // Events — transparency dashboard
   "event Deposited(address indexed contributor, uint8 indexed countryCode, uint256 netAmount, uint256 expiry)",
