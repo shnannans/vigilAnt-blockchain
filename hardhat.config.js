@@ -59,10 +59,8 @@ module.exports = {
   // ── ETHERSCAN VERIFICATION ─────────────────────────────────────────────────
   // Used by: npx hardhat verify --network sepolia <contractAddress> <...args>
   // Get a free API key at: https://etherscan.io/register
-  etherscan: {
-    apiKey: {
-      sepolia: ETHERSCAN_API_KEY,
-    },
+etherscan: {
+    apiKey: ETHERSCAN_API_KEY,
   },
 
   // ── GAS REPORTER ──────────────────────────────────────────────────────────
