@@ -80,7 +80,9 @@ async function main() {
   const LINK_FEE       = ethers.parseUnits("0.1", 18); // 0.1 LINK per request (standard Sepolia fee)
 
   // Convert job ID string to bytes32 (Chainlink expects bytes32)
-  const JOB_ID_BYTES32 = ethers.encodeBytes32String(JOB_ID_STRING);
+  // Cannot use encodeBytes32String — it maxes at 31 chars and throws on a 32-char job ID.
+  // Chainlink job IDs are 32-char hex strings (16 bytes). Correct conversion: hex pad to bytes32.
+  const JOB_ID_BYTES32 = ethers.zeroPadBytes("0x" + JOB_ID_STRING.replace(/-/g, ""), 32);
 
   // ── FEE RESERVE ─────────────────────────────────────────────────────────────
   // Address that receives the 5% platform fee on each deposit.

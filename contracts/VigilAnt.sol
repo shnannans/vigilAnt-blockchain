@@ -8,8 +8,8 @@ pragma solidity ^0.8.19;
 //  ConfirmedOwner which provides onlyOwner. Importing both causes a compile-time
 //  ownership conflict. ConfirmedOwner is the single source of ownership here.
 // ─────────────────────────────────────────────────────────────────────────────
-import "@chainlink/contracts/src/v0.8/ChainlinkClient.sol";
-import "@chainlink/contracts/src/v0.8/ConfirmedOwner.sol";
+import "@chainlink/contracts/src/v0.8/operatorforwarder/ChainlinkClient.sol";
+import "@chainlink/contracts/src/v0.8/shared/access/ConfirmedOwner.sol";
 
 // ─────────────────────────────────────────────────────────────────────────────
 //  IERC20 — minimal interface for USDC
@@ -404,8 +404,7 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
         //     (in the job spec's JSON parse/filter task) before returning the alert level.
         //
         // Update this comment once confirmed.
-        string memory countryISO = _countryISO(countryCode);
-        // for demo purposes
+        // for demo purposes (countryISO removed — mock URL used directly)
         req._add("get", "https://gist.githubusercontent.com/Hgowj/8f26ad2fda6590653f64dac4993fdced/raw/f38ff4109fac488f39e3bf942b03c0f69764d6f7/gdacs-mock.json");
 
         // Path to extract alert level from the GDACS response
