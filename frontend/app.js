@@ -277,11 +277,7 @@ async function initSession() {
   currentRole = isOwner ? "admin" : isVal ? "validator" : "contributor";
 
   // Load validator addresses
-  validatorAddresses = [];
-  for (let i = 0; i < 5; i++) {
-    try { validatorAddresses.push(await vigilant.validators(i)); }
-    catch { validatorAddresses.push(null); }
-  }
+  validatorAddresses = CONFIG.VALIDATORS;
 
   // Update wallet badge
   walletRole.textContent = currentRole.charAt(0).toUpperCase() + currentRole.slice(1);
@@ -297,11 +293,9 @@ async function initSession() {
   connectBtn.textContent = fmtAddress(currentAddress);
 
   // Load data
-  await Promise.all([
-    refreshPoolStats(),
-    refreshContributorPanel(),
-    currentRole !== "contributor" ? refreshValidatorPanel() : Promise.resolve(),
-  ]);
+  await refreshContributorPanel();
+  await refreshPoolStats();
+  if (currentRole !== "contributor") await refreshValidatorPanel();
 
   // Start event listeners
   startFeedListeners();
@@ -370,13 +364,8 @@ async function refreshContributorPanel() {
         contribStatus.className = "contrib-value contrib-status active";
       }
 
-      // Disable deposit if active contribution exists
-      if (amount > 0 && !c.returned) {
-        depositBtn.disabled = true;
-        depositBtn.textContent = "Active contribution exists";
-      } else {
-        enableDepositBtn();
-      }
+      // Enable deposit even if active contribution exists
+      enableDepositBtn();
     } else {
       contributionDisplay.classList.add("hidden");
       contribEmpty.classList.remove("hidden");
@@ -419,7 +408,12 @@ async function refreshValidatorPanel() {
     eventCountry.textContent   = `${country?.flag || ""} ${country?.name || "Unknown"}`;
     eventIdEl.textContent      = `#${latestId}`;
     eventReportedAt.textContent = fmtDate(evt.reportedAt);
-    eventGdacsId.textContent   = evt.gdacsEventId || "—";
+    // decode bytes32 to readable string, trim null bytes
+    try {
+      eventGdacsId.textContent = ethers.decodeBytes32String(evt.gdacsEventId) || "—";
+    } catch {
+      eventGdacsId.textContent = evt.gdacsEventId === "0x0000000000000000000000000000000000000000000000000000000000000000" ? "—" : evt.gdacsEventId;
+    }
 
     const severity = Number(evt.severity);
     eventSeverity.textContent  = severity === 2 ? "🔴 Red Alert" : "🟠 Orange Alert";
@@ -488,7 +482,7 @@ async function handleDeposit() {
     // Step 1: Approve full amount (net + fee both pulled from user wallet)
     // ⚠️  Must approve full amountRaw — contract does two transferFrom internally
     const approveTx = await usdc.connect(signer).approve(CONFIG.VIGILANT_CONTRACT, amountRaw);
-    await approveTx.wait();
+    await approveTx.wait(1);
 
     txStep1.classList.remove("active");
     txStep1.classList.add("done");
@@ -497,7 +491,7 @@ async function handleDeposit() {
 
     // Step 2: Deposit
     const depositTx = await vigilant.connect(signer).deposit(country, amountRaw, duration);
-    await depositTx.wait();
+    await depositTx.wait(1);
 
     txStep2.classList.remove("active");
     txStep2.classList.add("done");
@@ -550,7 +544,7 @@ async function handleOracleRequest() {
     const tx = await vigilant.connect(signer).requestDisasterData(currentCountry);
     await tx.wait();
     t.remove();
-    toast("Oracle request sent!", "Chainlink DON is fetching GDACS data. Check feed for DisasterReported event.", "success");
+    toast("Oracle request sent!", "Chainlink is fetching GDACS data — DisasterReported event will appear in the feed in 1–3 minutes.", "success");
     await refreshPoolStats();
   } catch (err) {
     t.remove();
@@ -594,7 +588,7 @@ async function handleReturn() {
     t.remove();
     toast("Funds returned!", `USDC returned to ${fmtAddress(addr)}`, "success");
     returnAddress.value = "";
-    await refreshPoolStats();
+    await Promise.all([refreshPoolStats(), refreshContributorPanel()]);
   } catch (err) {
     t.remove();
     toast("Return failed", extractError(err), "error");
@@ -682,6 +676,7 @@ function startFeedListeners() {
 
 async function loadFeedHistory() {
   if (!vigilant) return;
+  if (activityFeed.querySelector(".feed-item")) return; // already loaded
   feedStatus.textContent = "Loading…";
   feedStatus.className = "feed-status";
   try {
@@ -703,8 +698,7 @@ async function loadFeedHistory() {
     allLogs.sort((a, b) => a.log.blockNumber - b.log.blockNumber);
 
     for (const { name, log } of allLogs) {
-      const block = await provider.getBlock(log.blockNumber).catch(() => null);
-      addFeedItem(name, log.args || {}, log.transactionHash, block?.timestamp);
+      addFeedItem(name, log.args || {}, log.transactionHash, null);
     }
 
     feedStatus.textContent = "Listening";
@@ -741,7 +735,7 @@ depositAmount.addEventListener("input", () => {
       `5% platform fee: ${fee} USDC — ${net} USDC enters the pool`;
   } else {
     document.getElementById("depositFeeHint").textContent =
-      `5% platform fee applies — 100 USDC deposited = 95 USDC in pool`;
+      `5% platform fee applies — e.g. 10 USDC deposited = 9.50 USDC in pool`;
   }
 });
 
@@ -761,3 +755,25 @@ if (window.ethereum) {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 buildStaticUI();
+
+// Show pool stats for ALL countries without requiring wallet connection
+if (CONFIG.VIGILANT_CONTRACT && !CONFIG.VIGILANT_CONTRACT.includes("FILL")) {
+  const readProvider = new ethers.JsonRpcProvider(CONFIG.RPC_URLS[0]);
+  const readContract = new ethers.Contract(CONFIG.VIGILANT_CONTRACT, VIGILANT_ABI, readProvider);
+
+  // Load balance for current selected country (default: Japan)
+  readContract.getPoolBalance(currentCountry)
+    .then(b => { if (poolBalance) poolBalance.textContent = fmt(b); })
+    .catch(() => {});
+
+  // Re-fetch whenever country selector changes before wallet connects
+  document.querySelectorAll(".country-btn").forEach(btn => {
+    btn.addEventListener("click", () => {
+      if (!vigilant) { // only use read-only provider if wallet not connected
+        readContract.getPoolBalance(currentCountry)
+          .then(b => { if (poolBalance) poolBalance.textContent = fmt(b); })
+          .catch(() => {});
+      }
+    });
+  });
+}
