@@ -62,27 +62,42 @@ async function main() {
     "0x13831f285554B53850Ee42049F9c61924F72F2a7",   // NGO-VN — Vietnam 🇻🇳
   ];
 
-  // Minimum USDC payout per NGO — 5 USDC each (in 6-decimal units)
-  // 5 USDC = 5_000_000n  (USDC uses 6 decimals, NOT 18)
+  // Minimum USDC payout per NGO — 50 USDC each (in 6-decimal units)
+  // 50 USDC = 50_000_000  (USDC uses 6 decimals, NOT 18)
   const NGO_MIN_AMOUNTS = [
-    5_000_000n,   // NGO-JP — 5 USDC
-    5_000_000n,   // NGO-TH — 5 USDC
-    5_000_000n,   // NGO-PH — 5 USDC
-    5_000_000n,   // NGO-ID — 5 USDC
-    5_000_000n,   // NGO-VN — 5 USDC
+    50_000_000n,   // NGO-JP — 50 USDC
+    50_000_000n,   // NGO-TH — 50 USDC
+    50_000_000n,   // NGO-PH — 50 USDC
+    50_000_000n,   // NGO-ID — 50 USDC
+    50_000_000n,   // NGO-VN — 50 USDC
   ];
 
   // ── CHAINLINK ORACLE CONFIG — PERSON B FILLS IN ────────────────────────────
   // Person B: fill these in after setting up the Chainlink Any API job.
   // Find them in your Chainlink node dashboard / job-spec.md.
-  const ORACLE_ADDRESS = "0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD";  // Person B fills in
-  const JOB_ID_STRING  = "7da2702f37fd48e5b1b9a5715e3509b6";             // Person B fills in (string, will be converted to bytes32)
+  const ORACLE_ADDRESS = "0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD";  // Oracle/Operator contract (Sepolia)
+  const JOB_ID_STRING  = "7da2702f37fd48e5b1b9a5715e3509b6";             // Job ID (hex string, 16 bytes)
   const LINK_FEE       = ethers.parseUnits("0.1", 18); // 0.1 LINK per request (standard Sepolia fee)
 
-  // Convert job ID string to bytes32 (Chainlink expects bytes32)
-  // Cannot use encodeBytes32String — it maxes at 31 chars and throws on a 32-char job ID.
-  // Chainlink job IDs are 32-char hex strings (16 bytes). Correct conversion: hex pad to bytes32.
-  const JOB_ID_BYTES32 = ethers.zeroPadBytes("0x" + JOB_ID_STRING.replace(/-/g, ""), 32);
+  // Convert job ID to bytes32 (Chainlink expects bytes32).
+  // Supports:
+  // 1) UUID with dashes   -> "9f0e2f67-2d7f-4b84-bb7d-9e1a4e7d6c31"
+  // 2) 0x-prefixed bytes32 hex
+  // 3) 32-hex-char job IDs (16 bytes) -> left-pad to bytes32
+  // 4) short plain text (<=31 chars) via encodeBytes32String
+  let JOB_ID_BYTES32;
+  if (/^0x[0-9a-fA-F]{64}$/.test(JOB_ID_STRING)) {
+    JOB_ID_BYTES32 = JOB_ID_STRING;
+  } else if (/^[0-9a-fA-F]{32}$/.test(JOB_ID_STRING)) {
+    JOB_ID_BYTES32 = ethers.zeroPadBytes("0x" + JOB_ID_STRING, 32);
+  } else if (/^[0-9a-fA-F-]{36}$/.test(JOB_ID_STRING) && JOB_ID_STRING.includes("-")) {
+    const uuidHex = JOB_ID_STRING.replace(/-/g, "");
+    // Chainlink Direct Request expects UUID bytes left-aligned in bytes32:
+    // bytes32(uint256(bytes16(uuid)) << 128)
+    JOB_ID_BYTES32 = "0x" + uuidHex + "0".repeat(32);
+  } else {
+    JOB_ID_BYTES32 = ethers.encodeBytes32String(JOB_ID_STRING);
+  }
 
   // ── FEE RESERVE ─────────────────────────────────────────────────────────────
   // Address that receives the 5% platform fee on each deposit.

@@ -56,7 +56,7 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
     //  Always multiply display amounts by USDC_DECIMALS before any contract call.
     // ─────────────────────────────────────────────────────────────────────────
     uint256 public constant USDC_DECIMALS   = 1e6;              // 6 decimals
-    uint256 public constant MIN_DEPOSIT = 1 * 1e6;              // 1 USDC — lowered for demo
+    uint256 public constant MIN_DEPOSIT     = 10 * 1e6;         // 10 USDC minimum
     uint256 public constant PLATFORM_FEE    = 5;                // 5% fee at deposit
     uint256 public constant PAYOUT_PERCENT  = 40;               // 40% of pool per event
     uint8   public constant THRESHOLD       = 3;                // confirmations to trigger payout
@@ -66,7 +66,6 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
     uint256 public constant ONE_MONTH    = 30 days;
     uint256 public constant THREE_MONTHS = 90 days;
     uint256 public constant SIX_MONTHS   = 180 days;
-    uint256 public constant FIVE_MINUTES = 5 minutes; // demo only — to remove in production
 
     // ─────────────────────────────────────────────────────────────────────────
     //  ENUMS
@@ -137,8 +136,7 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
     address[5] private validators;
 
     // Contributions — keyed by contributor address
-    // One active contribution per wallet at a time
-    // Guard removed — multiple deposits allowed, each overwrites the previous record
+    // One active contribution per wallet at a time (can re-deposit after expiry)
     mapping(address => Contribution) public contributions;
 
     // Pool balances — keyed by countryCode (1–5)
@@ -321,8 +319,12 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
         uint256 amount,
         uint8 duration
     ) external validCountry(countryCode) {
-        require(amount >= MIN_DEPOSIT, "VigilAnt: below minimum deposit (1 USDC)");
-        require(duration <= 3, "VigilAnt: invalid duration (use 0, 1, 2, or 3)");
+        require(amount >= MIN_DEPOSIT, "VigilAnt: below minimum deposit (10 USDC)");
+        require(duration <= 2, "VigilAnt: invalid duration (use 0, 1, or 2)");
+        require(
+            contributions[msg.sender].amount == 0 || contributions[msg.sender].returned,
+            "VigilAnt: active contribution exists - wait for expiry or payout"
+        );
 
         // Calculate fee and net amount
         uint256 platformFee = (amount * PLATFORM_FEE) / 100;
@@ -334,10 +336,9 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
 
         // Calculate expiry timestamp
         uint256 durationSeconds;
-        if (duration == 0)      durationSeconds = ONE_MONTH;
+        if (duration == 0) durationSeconds = ONE_MONTH;
         else if (duration == 1) durationSeconds = THREE_MONTHS;
-        else if (duration == 2) durationSeconds = SIX_MONTHS;
-        else                    durationSeconds = FIVE_MINUTES; // duration == 3, for demo only
+        else durationSeconds = SIX_MONTHS;
 
         uint256 expiry = block.timestamp + durationSeconds;
 
@@ -402,8 +403,7 @@ contract VigilAnt is ChainlinkClient, ConfirmedOwner {
         //     and configure the Chainlink job to filter by country ISO code client-side
         //     (in the job spec's JSON parse/filter task) before returning the alert level.
         //
-        // Update this comment once confirmed.
-        // for demo purposes (countryISO removed — mock URL used directly)
+        // for demo purposes (countryISO removed - mock URL used directly)
         req._add("get", "https://gist.githubusercontent.com/Hgowj/8f26ad2fda6590653f64dac4993fdced/raw/f38ff4109fac488f39e3bf942b03c0f69764d6f7/gdacs-mock.json");
 
         // Path to extract alert level from the GDACS response

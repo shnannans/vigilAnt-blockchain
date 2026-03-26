@@ -58,8 +58,9 @@ module.exports = {
 
   // ── ETHERSCAN VERIFICATION ─────────────────────────────────────────────────
   // Used by: npx hardhat verify --network sepolia <contractAddress> <...args>
+  // Hardhat Verify now expects a single Etherscan API v2 key (not per-network keys).
   // Get a free API key at: https://etherscan.io/register
-etherscan: {
+  etherscan: {
     apiKey: ETHERSCAN_API_KEY,
   },
 
