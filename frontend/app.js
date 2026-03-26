@@ -84,6 +84,7 @@ let selectedDuration = 0;   // 0=1mo 1=3mo 2=6mo
 let validatorAddresses = [];
 let feedListening    = false;
 let isContractDeployed = false;
+let feedHistoryLoaded = false;
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 const fmt = (usdc6) => usdc6 !== undefined && usdc6 !== null
@@ -676,7 +677,8 @@ function startFeedListeners() {
 
 async function loadFeedHistory() {
   if (!vigilant) return;
-  if (activityFeed.querySelector(".feed-item")) return; // already loaded
+  if (feedHistoryLoaded) return;
+  feedHistoryLoaded = true;
   feedStatus.textContent = "Loading…";
   feedStatus.className = "feed-status";
   try {
