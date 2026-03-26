@@ -15,7 +15,7 @@ export const CONFIG = {
 
   // ── Contracts ─────────────────────────────────────────────────────────────
   // ⚠️  Fill VIGILANT_CONTRACT after Person A deploys — update here + notify team
-  VIGILANT_CONTRACT: "0x477f721640CfB9a9c3A8aE953B1f69a45F15B904",
+  VIGILANT_CONTRACT: "0xC7E948D515d3a501033728469F728680D1dFB37A", // UPDATED 25 MARCH
   USDC_ADDRESS:      "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // DO NOT CHANGE
 
   // ── USDC ──────────────────────────────────────────────────────────────────
@@ -23,6 +23,15 @@ export const CONFIG = {
   //     e.g.  const raw = inputValue * CONFIG.USDC_UNIT
   USDC_DECIMALS: 6,
   USDC_UNIT:     1_000_000,
+
+  // ── Validators ─────────────────────────────────────────────────────────────
+  VALIDATORS: [
+  "0x06cBE48CD25F61682740F76B6cd966862b21015F",  // shannon
+  "0xB4A6b8A3cC14389df36f5470c5A860C7C0F8eb13",  // jing wen
+  "0xa2b2874B8cBD27bce28A6c9c2B909521dD3C6477",  // corvan
+  "0xC5b5a02Ba126F3c0a7a1e1A315E1708ccdE4211c",  // venecia
+  "0x8257Ba2524235f3a4150F7Af864BA0c0cc8fF914",  // jeanie
+  ],
 
   // ── Countries ─────────────────────────────────────────────────────────────
   COUNTRIES: {
@@ -38,23 +47,13 @@ export const CONFIG = {
     { label: "1 Month",  value: 0, seconds: 30 * 24 * 60 * 60 },
     { label: "3 Months", value: 1, seconds: 90 * 24 * 60 * 60 },
     { label: "6 Months", value: 2, seconds: 180 * 24 * 60 * 60 },
+    { label: "5 Minutes (Demo)", value: 3, seconds: 5 * 60},
   ],
-  MIN_DEPOSIT_USDC: 10,   // display only — contract enforces 10 * 1e6
+  MIN_DEPOSIT_USDC: 1,   // display only — contract enforces 1 * 1e6
   PLATFORM_FEE_PCT: 5,    // for UI disclosure only
 
   // ── Feed ──────────────────────────────────────────────────────────────────
-  FEED_BLOCK_RANGE: 1000, // how far back to scan for past events on load
-
-  // ── Validators ────────────────────────────────────────────────────────────
-  // validators array is private in contract — frontend reads from here instead
-  // Order must match exactly what was passed into the constructor
-  VALIDATORS: [
-    "0x06cBE48CD25F61682740F76B6cd966862b21015F", // [0] shannon
-    "0xB4A6b8A3cC14389df36f5470c5A860C7C0F8eb13", // [1] jing wen
-    "0xa2b2874B8cBD27bce28A6c9c2B909521dD3C6477", // [2] corvan
-    "0xC5b5a02Ba126F3c0a7a1e1A315E1708ccdE4211c", // [3] venecia
-    "0x8257Ba2524235f3a4150F7Af864BA0c0cc8fF914", // [4] jeanie
-  ],
+  FEED_BLOCK_RANGE: 10000, // how far back to scan for past events on load
 };
 
 // ── Minimal ABIs ─────────────────────────────────────────────────────────────
@@ -77,7 +76,6 @@ export const VIGILANT_ABI = [
   "function getContribution(address contributor) external view returns (tuple(address contributor, uint8 countryCode, uint256 amount, uint256 expiry, bool returned))",
   "function getPoolBalance(uint8 countryCode) external view returns (uint256)",
   "function getDisasterEvent(uint256 eventId) external view returns (tuple(uint8 countryCode, uint8 severity, bytes32 gdacsEventId, uint256 reportedAt, uint8 confirmations, uint8 status))",
-  "function getConfirmationCount(uint256 eventId) external view returns (uint8)",
   "function hasConfirmed(uint256 eventId, address validator) external view returns (bool)",
   "function isValidator(address account) external view returns (bool)",
   "function getLatestEvent(uint8 countryCode) external view returns (uint256)",

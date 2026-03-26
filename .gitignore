@@ -11,3 +11,9 @@ cache/
 # OS junk files
 .DS_Store
 Thumbs.db
+
+# Hardhat verification cache
+.openzeppelin/
+
+# dotenv debug logs (created by dotenvx automatically)
+.env.keys

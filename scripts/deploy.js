@@ -62,14 +62,14 @@ async function main() {
     "0x13831f285554B53850Ee42049F9c61924F72F2a7",   // NGO-VN — Vietnam 🇻🇳
   ];
 
-  // Minimum USDC payout per NGO — 50 USDC each (in 6-decimal units)
-  // 50 USDC = 50_000_000  (USDC uses 6 decimals, NOT 18)
+  // Minimum USDC payout per NGO — 5 USDC each (in 6-decimal units)
+  // 5 USDC = 5_000_000n  (USDC uses 6 decimals, NOT 18)
   const NGO_MIN_AMOUNTS = [
-    50_000_000n,   // NGO-JP — 50 USDC
-    50_000_000n,   // NGO-TH — 50 USDC
-    50_000_000n,   // NGO-PH — 50 USDC
-    50_000_000n,   // NGO-ID — 50 USDC
-    50_000_000n,   // NGO-VN — 50 USDC
+    5_000_000n,   // NGO-JP — 5 USDC
+    5_000_000n,   // NGO-TH — 5 USDC
+    5_000_000n,   // NGO-PH — 5 USDC
+    5_000_000n,   // NGO-ID — 5 USDC
+    5_000_000n,   // NGO-VN — 5 USDC
   ];
 
   // ── CHAINLINK ORACLE CONFIG — PERSON B FILLS IN ────────────────────────────
