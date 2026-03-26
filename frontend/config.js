@@ -15,7 +15,7 @@ export const CONFIG = {
 
   // ── Contracts ─────────────────────────────────────────────────────────────
   // ⚠️  Fill VIGILANT_CONTRACT after Person A deploys — update here + notify team
-  VIGILANT_CONTRACT: "0x__FILL_AFTER_DEPLOY__",
+  VIGILANT_CONTRACT: "0xC7E948D515d3a501033728469F728680D1dFB37A",
   USDC_ADDRESS:      "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238", // DO NOT CHANGE
 
   // ── USDC ──────────────────────────────────────────────────────────────────

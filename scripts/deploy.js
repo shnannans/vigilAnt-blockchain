@@ -75,12 +75,29 @@ async function main() {
   // ── CHAINLINK ORACLE CONFIG — PERSON B FILLS IN ────────────────────────────
   // Person B: fill these in after setting up the Chainlink Any API job.
   // Find them in your Chainlink node dashboard / job-spec.md.
-  const ORACLE_ADDRESS = "0x_FILL_IN_ORACLE_ADDRESS";  // Person B fills in
-  const JOB_ID_STRING  = "FILL_IN_JOB_ID";             // Person B fills in (string, will be converted to bytes32)
+  const ORACLE_ADDRESS = "0x6090149792dAAeE9D1D568c9f9a6F6B46AA29eFD";  // Oracle/Operator contract (Sepolia)
+  const JOB_ID_STRING  = "7da2702f37fd48e5b1b9a5715e3509b6";             // Job ID (hex string, 16 bytes)
   const LINK_FEE       = ethers.parseUnits("0.1", 18); // 0.1 LINK per request (standard Sepolia fee)
 
-  // Convert job ID string to bytes32 (Chainlink expects bytes32)
-  const JOB_ID_BYTES32 = ethers.encodeBytes32String(JOB_ID_STRING);
+  // Convert job ID to bytes32 (Chainlink expects bytes32).
+  // Supports:
+  // 1) UUID with dashes   -> "9f0e2f67-2d7f-4b84-bb7d-9e1a4e7d6c31"
+  // 2) 0x-prefixed bytes32 hex
+  // 3) 32-hex-char job IDs (16 bytes) -> left-pad to bytes32
+  // 4) short plain text (<=31 chars) via encodeBytes32String
+  let JOB_ID_BYTES32;
+  if (/^0x[0-9a-fA-F]{64}$/.test(JOB_ID_STRING)) {
+    JOB_ID_BYTES32 = JOB_ID_STRING;
+  } else if (/^[0-9a-fA-F]{32}$/.test(JOB_ID_STRING)) {
+    JOB_ID_BYTES32 = ethers.zeroPadBytes("0x" + JOB_ID_STRING, 32);
+  } else if (/^[0-9a-fA-F-]{36}$/.test(JOB_ID_STRING) && JOB_ID_STRING.includes("-")) {
+    const uuidHex = JOB_ID_STRING.replace(/-/g, "");
+    // Chainlink Direct Request expects UUID bytes left-aligned in bytes32:
+    // bytes32(uint256(bytes16(uuid)) << 128)
+    JOB_ID_BYTES32 = "0x" + uuidHex + "0".repeat(32);
+  } else {
+    JOB_ID_BYTES32 = ethers.encodeBytes32String(JOB_ID_STRING);
+  }
 
   // ── FEE RESERVE ─────────────────────────────────────────────────────────────
   // Address that receives the 5% platform fee on each deposit.
