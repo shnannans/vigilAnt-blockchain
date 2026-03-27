@@ -1,0 +1,47 @@
+version: "3.8"
+
+services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: chainlink
+      POSTGRES_PASSWORD: ChainlinkDbPass_1234
+      POSTGRES_DB: chainlink
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  chainlink:
+    image: smartcontract/chainlink:2.17.0
+    restart: unless-stopped
+    depends_on:
+      - postgres
+    ports:
+      - "6688:6688"
+    env_file:
+      - .env
+    environment:
+      CL_API_EMAIL: admin@example.com
+      CL_API_PASSWORD: StrongAPIPassword123!
+      CL_KEYSTORE_PASSWORD: StrongNodePassword123!
+      CL_CONFIG: |
+        [WebServer.TLS]
+        HTTPSPort = 0
+        [[EVM]]
+        ChainID = "11155111"
+        Enabled = true
+        [[EVM.Nodes]]
+        Name = "sepolia"
+        WSURL = "${SEPOLIA_RPC_WS_URL}"
+        HTTPURL = "${SEPOLIA_RPC_HTTP_URL}"
+    entrypoint: ["/bin/sh", "-lc"]
+    volumes:
+      - cldata:/chainlink
+    command:
+      - echo "$$CL_API_EMAIL" > /tmp/.api; echo "$$CL_API_PASSWORD" >> /tmp/.api; printf %s "$$CL_KEYSTORE_PASSWORD" > /tmp/.password; chainlink node start -a /tmp/.api -p /tmp/.password
+
+volumes:
+  pgdata:
+  cldata:
