@@ -444,15 +444,15 @@ async function refreshValidatorPanel() {
       ? await vigilant.hasConfirmed(latestId, currentAddress)
       : false;
 
-    if (currentRole === "validator" || currentRole === "admin") {
-      confirmBtn.disabled = alreadyConfirmed || confs >= 3;
-      confirmBtn.textContent = alreadyConfirmed
-        ? "Already confirmed"
-        : confs >= 3
-        ? "Threshold reached"
-        : "Confirm Disaster";
-      confirmBtn.dataset.eventId = latestId;
-    }
+    const canConfirm = currentRole === "validator" || currentRole === "admin";
+    confirmBtn.disabled = !canConfirm || alreadyConfirmed || confs >= 3;
+    confirmBtn.textContent = alreadyConfirmed
+      ? "Already confirmed"
+      : confs >= 3
+      ? "Threshold reached"
+      : "Confirm Disaster";
+    confirmBtn.dataset.eventId = latestId;
+    
   } catch (err) {
     console.error("refreshValidatorPanel:", err);
   }
