@@ -294,6 +294,12 @@ The current POC handles five countries with one NGO per pool and admin-triggered
 
 ---
 
+## Demo
+
+[![vigilAnt Demo](https://img.youtube.com/vi/Ibk8FJpvMmM/maxresdefault.jpg)](https://youtu.be/Ibk8FJpvMmM)
+
+Watch the full demo on YouTube: https://youtu.be/Ibk8FJpvMmM
+
 ## Acknowledgements
 
 - Chainlink Any API documentation — https://docs.chain.link/any-api/introduction
