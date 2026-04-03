@@ -293,10 +293,9 @@ The current POC handles five countries with one NGO per pool and admin-triggered
 | Jeanie Cherie Chua Yue-Ning | Report and demo |
 
 ---
-
 ## Demo
 
-[![vigilAnt Demo](https://img.youtube.com/vi/Ibk8FJpvMmM/maxresdefault.jpg)](https://youtu.be/Ibk8FJpvMmM)
+[![vigilAnt Demo](https://img.youtube.com/vi/Ibk8FJpvMmM/hqdefault.jpg)](https://youtu.be/Ibk8FJpvMmM)
 
 Watch the full demo on YouTube: https://youtu.be/Ibk8FJpvMmM
 
